@@ -16,10 +16,12 @@ package com.google.firebase.samples.apps.mlkit;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.SurfaceTexture;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.TextureView;
 import android.view.ViewGroup;
 
 import com.google.android.gms.common.images.Size;
@@ -31,7 +33,8 @@ public class CameraSourcePreview extends ViewGroup {
   private static final String TAG = "MIDemoApp:Preview";
 
   private Context context;
-  private SurfaceView surfaceView;
+//  private SurfaceView surfaceView;
+  private AutoFitTextureView mAutoFitTextureView;
   private boolean startRequested;
   private boolean surfaceAvailable;
   private CameraSource cameraSource;
@@ -44,10 +47,32 @@ public class CameraSourcePreview extends ViewGroup {
     startRequested = false;
     surfaceAvailable = false;
 
-    surfaceView = new SurfaceView(context);
-    surfaceView.getHolder().addCallback(new SurfaceCallback());
-    addView(surfaceView);
+//    surfaceView = new SurfaceView(context);
+//    surfaceView.getHolder().addCallback(new SurfaceCallback());
+//    addView(surfaceView);
+
+    mAutoFitTextureView = new AutoFitTextureView(context);
+    mAutoFitTextureView.setSurfaceTextureListener(mSurfaceTextureListener);
+    addView(mAutoFitTextureView);
   }
+
+  private final TextureView.SurfaceTextureListener mSurfaceTextureListener = new TextureView.SurfaceTextureListener() {
+    @Override
+    public void onSurfaceTextureAvailable(SurfaceTexture texture, int width, int height) {
+      surfaceAvailable = true;
+      overlay.bringToFront();
+      try {startIfReady();} catch (IOException e) {Log.e(TAG, "Could not start camera source.", e);}
+    }
+    @Override
+    public void onSurfaceTextureSizeChanged(SurfaceTexture texture, int width, int height) {}
+    @Override
+    public boolean onSurfaceTextureDestroyed(SurfaceTexture texture) {
+      surfaceAvailable = false;
+      return true;
+    }
+    @Override
+    public void onSurfaceTextureUpdated(SurfaceTexture texture) {}
+  };
 
   public void start(CameraSource cameraSource) throws IOException {
     if (cameraSource == null) {
@@ -83,7 +108,8 @@ public class CameraSourcePreview extends ViewGroup {
   @SuppressLint("MissingPermission")
   private void startIfReady() throws IOException {
     if (startRequested && surfaceAvailable) {
-      cameraSource.start(surfaceView.getHolder());
+//      cameraSource.start(surfaceView.getHolder());
+      cameraSource.startWithTextureView(mAutoFitTextureView);
       if (overlay != null) {
         Size size = cameraSource.getPreviewSize();
         int min = Math.min(size.getWidth(), size.getHeight());

@@ -199,6 +199,30 @@ public class CameraSource {
   }
 
   /**
+   * Another start function using TextureView
+   * @param textureView
+   * @return
+   * @throws IOException
+   */
+  public synchronized CameraSource startWithTextureView(AutoFitTextureView textureView) throws IOException {
+//    synchronized (mCameraLock) {
+      if(camera != null) {
+        return this;
+      }
+      Log.v("CameraSource", "start with textureview");
+
+      camera = createCamera();
+      camera.setPreviewTexture(textureView.getSurfaceTexture());
+      camera.startPreview();
+
+      processingThread = new Thread(processingRunnable);
+      processingRunnable.setActive(true);
+      processingThread.start();
+//    }
+    return this;
+  }
+
+  /**
    * Closes the camera and stops sending frames to the underlying frame detector.
    *
    * <p>This camera source may be restarted again by calling {@link #start()} or {@link

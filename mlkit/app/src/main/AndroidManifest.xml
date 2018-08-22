@@ -16,7 +16,7 @@
         android:theme="@style/MaterialTheme">
         <meta-data
             android:name="com.google.firebase.ml.vision.DEPENDENCIES"
-            android:value="barcode,face,ocr,ica" />
+            android:value="barcode" />
         <activity
             android:name="com.google.firebase.samples.apps.mlkit.ChooserActivity"
             android:exported="true"
